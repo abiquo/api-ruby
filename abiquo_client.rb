@@ -62,20 +62,26 @@ class AbiquoClient
     end
   end
 
+  def new_object(hash)
+    AbiquoClient::LinkModel.new(hash.merge({ :client => self}))
+  end
+
   def post(link, data, options = {})
-    @http_client.request(
-      :expects  => [201, 202],
-      :method   => 'POST',
-      :path     => link.href,
-      :accept   => link.type,
-      :content  => link.type,
-      :body     => data.to_json,
-      :query    => options
-    )
+    AbiquoClient::LinkModel.new({ :client => self}.merge(
+      @http_client.request(
+        :expects  => [201, 202],
+        :method   => 'POST',
+        :path     => link.href,
+        :accept   => link.type,
+        :content  => link.type,
+        :body     => data.to_json,
+        :query    => options
+      )
+    ))
   end
 
   def put()
-    AbiquoClient::LinkModel.new(
+    AbiquoClient::LinkModel.new({ :client => self}.merge(
       @http_client.request(
         :expects  => [201, 202],
         :method   => 'PUT',
@@ -85,7 +91,7 @@ class AbiquoClient
         :body     => data.to_json,
         :query    => options
       )
-    )
+    ))
   end
 
   def delete(link, options = {})
@@ -94,5 +100,6 @@ class AbiquoClient
       :method   => 'DELETE',
       :path     => link.href
     )
+    nil
   end
 end

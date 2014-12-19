@@ -6,10 +6,12 @@ module AbiquoAPIClient
       raise "Needs a connection!" if attrs[:client].nil? 
       @client = attrs.delete(:client)
 
-      attributes = attrs.clone
+      attributes = Hash[attrs.clone.map {|k, v| [k.to_s, v ] }]
       
       if not attributes['links'].nil?
         attributes['links'].each do |link|
+          link = link.to_hash if link.is_a? AbiquoAPIClient::Link
+          
           if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
             # Create a URL string attribute
             rel = 'url'
@@ -21,7 +23,7 @@ module AbiquoAPIClient
           # Also sets value to a Link object
           rel = "#{link['rel'].gsub(/\//, '_')}"
           create_attr(rel)
-          instance_variable_set("@#{rel}", Link.new(link))
+          instance_variable_set("@#{rel}", Link.new(link.merge({:client => @client})))
 
           # For every link that points to an ID
           # create a getter
@@ -32,7 +34,7 @@ module AbiquoAPIClient
           end
         end
         attributes.delete('links')
-
+        
         # Now create getters and setters for every method
         attributes.keys.each do |k|
           create_attr(k)
@@ -41,39 +43,36 @@ module AbiquoAPIClient
       end
     end
 
-    def merge_attributes(new_attributes = {})
-      if not new_attributes['links'].nil?
-        new_attributes['links'].each do |link|
-          rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
-          if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
-            rel = 'url'
-          end
-          new_attributes[rel] = link
-        end
-      end
-      super
-    end 
+    # def merge_attributes(new_attributes = {})
+    #   if not new_attributes['links'].nil?
+    #     new_attributes['links'].each do |link|
+    #       rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
+    #       if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
+    #         rel = 'url'
+    #       end
+    #       new_attributes[rel] = link
+    #     end
+    #   end
+    #   super
+    # end 
 
     def to_json
-      att = self.attributes.clone
+      att = self.instance_variables.map {|v| v.to_s }
       links = []
       data = {}
 
-      if att.key?(:url)
-        urllnk = att.delete(:url)
-        urllnk['rel'] = "edit"
-        links << urllnk
-      end
+      att.delete("@url")
+      att.delete("@client")
 
-      att.keys.each do |opt|
-        if opt.to_s.include? "_lnk"
-          links << att[opt] unless att[opt].nil?
+      att.each do |opt|
+        if instance_variable_get(opt).is_a? AbiquoAPIClient::Link
+          links << instance_variable_get(opt).to_hash
         else
-          data[opt.to_s] = att[opt] unless att[opt].nil?
+          data[opt.delete("@")] = instance_variable_get(opt)
         end
       end
       data['links'] = links
-      JSON.parse(data)
+      data.to_json
     end
 
     def inspect
@@ -105,14 +104,7 @@ module AbiquoAPIClient
       end
 
       create_method( name.to_sym ) { 
-        t = instance_variable_get( "@" + name )
-
-        if t.is_a? AbiquoAPIClient::Link
-          # If it is a link, let's get it and return it.
-          @client.get(t)
-        else
-          t
-        end
+        instance_variable_get( "@" + name )
       }
     end
   end
