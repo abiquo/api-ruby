@@ -11,7 +11,7 @@ module AbiquoAPIClient
       if not attributes['links'].nil?
         attributes['links'].each do |link|
           link = link.to_hash if link.is_a? AbiquoAPIClient::Link
-          
+
           if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
             # Create a URL string attribute
             rel = 'url'
@@ -43,19 +43,6 @@ module AbiquoAPIClient
       end
     end
 
-    # def merge_attributes(new_attributes = {})
-    #   if not new_attributes['links'].nil?
-    #     new_attributes['links'].each do |link|
-    #       rel = "#{link['rel'].gsub(/\//, '_')}_lnk"
-    #       if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
-    #         rel = 'url'
-    #       end
-    #       new_attributes[rel] = link
-    #     end
-    #   end
-    #   super
-    # end 
-
     def to_json
       att = self.instance_variables.map {|v| v.to_s }
       links = []
@@ -82,12 +69,20 @@ module AbiquoAPIClient
         unless self.instance_variables.empty?
           vars = self.instance_variables.clone
           vars.delete(:@client)
-          data << "\n#{Thread.current[:formatador].indentation}"
+          data << "\n"
           data << vars.map { |v| "#{v}=#{instance_variable_get(v.to_s).inspect}" }.join(",\n#{Thread.current[:formatador].indentation}")
         end
       end
       data << "\n#{Thread.current[:formatador].indentation}>"
       data
+    end
+
+    def update
+      @client.put(self.edit, self)
+    end
+
+    def delete
+      @client.delete(self.edit)
     end
 
     private

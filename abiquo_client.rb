@@ -29,8 +29,8 @@ class AbiquoClient
       :path     => "#{api_path}/login",
       :accept   => 'application/vnd.abiquo.user+json'
       )
-    @enterprise = loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first
-    @user = loginresp
+    @enterprise = AbiquoAPIClient::Link.new(loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first)
+    @user = AbiquoClient::LinkModel.new(loginresp.merge({:client => self}))
 
     @properties = @http_client.request(
       :expects  => [200],
@@ -80,10 +80,10 @@ class AbiquoClient
     ))
   end
 
-  def put()
+  def put(link, data, options = {})
     AbiquoClient::LinkModel.new({ :client => self}.merge(
       @http_client.request(
-        :expects  => [201, 202],
+        :expects  => [200, 201, 202],
         :method   => 'PUT',
         :path     => link.href,
         :accept   => link.type,
