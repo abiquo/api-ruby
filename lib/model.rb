@@ -9,8 +9,11 @@ module AbiquoAPIClient
       attributes = Hash[attrs.clone.map {|k, v| [k.to_s, v ] }]
       
       if not attributes['links'].nil?
+        links = []
+
         attributes['links'].each do |link|
           link = link.to_hash if link.is_a? AbiquoAPIClient::Link
+          new_lnk = {}
 
           if 'edit'.eql?(link['rel']) or 'self'.eql?(link['rel'])
             # Create a URL string attribute
@@ -22,8 +25,10 @@ module AbiquoAPIClient
           # Create new getters and setters
           # Also sets value to a Link object
           rel = "#{link['rel'].gsub(/\//, '_')}"
-          create_attr(rel)
-          instance_variable_set("@#{rel}", Link.new(link.merge({:client => @client})))
+          new_lnk[rel.to_sym] = Link.new(link.merge({:client => @client}))
+          links << new_lnk
+          # create_attr(rel)
+          # instance_variable_set("@#{rel}", Link.new(link.merge({:client => @client})))
 
           # For every link that points to an ID
           # create a getter
@@ -34,6 +39,9 @@ module AbiquoAPIClient
           end
         end
         attributes.delete('links')
+
+        create_attr("links")
+        instance_variable_set("@links", links)
         
         # Now create getters and setters for every method
         attributes.keys.each do |k|
@@ -51,12 +59,13 @@ module AbiquoAPIClient
       att.delete("@url")
       att.delete("@client")
 
+      self.links.each do |l|
+        links << l.values.first.to_hash
+      end
+      att.delete("@links")
+
       att.each do |opt|
-        if instance_variable_get(opt).is_a? AbiquoAPIClient::Link
-          links << instance_variable_get(opt).to_hash
-        else
-          data[opt.delete("@")] = instance_variable_get(opt)
-        end
+        data[opt.delete("@")] = instance_variable_get(opt)
       end
       data['links'] = links
       data.to_json
@@ -77,12 +86,25 @@ module AbiquoAPIClient
       data
     end
 
+    def link(link_rel)
+      self.links.select {|l| l[link_rel] }.first[link_rel]
+    end
+
+    def has_link?(link_rel)
+      c = self.links.select {|l| l[link_rel] }.count
+      c == 0 ? false : true
+    end
+
     def update
-      @client.put(self.edit, self)
+      @client.put(self.link(:edit), self)
     end
 
     def delete
-      @client.delete(self.edit)
+      @client.delete(self.link(:edit))
+    end
+
+    def refresh
+      self.link(:edit).get
     end
 
     private

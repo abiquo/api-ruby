@@ -37,6 +37,8 @@ module AbiquoAPIClient
       params[:path] = path
       
       response = issue_request(params)
+      return nil if response.nil?
+      
       response = JSON.parse(response.body) unless response.body.empty?
 
       # Handle pagination
@@ -46,7 +48,9 @@ module AbiquoAPIClient
         
         loop do
           next_url = response['links'].select {|l| l['rel'].eql? "next" }.first['href']
-          params[:path] = next_url.gsub!(/^.*#{@api_path}/, "") if next_url.include?(@api_path)
+          uri = URI.parse(next_url)
+          params[:path] = uri.path
+          params[:query] = uri.query
           params[:headers] = headers
           response = issue_request(params)
           response = JSON.parse(response.body) unless response.body.empty?
@@ -75,7 +79,7 @@ module AbiquoAPIClient
         # Get all "Set-Cookie" headers and replace them with "Cookie" header.
         @cookies = Hash[resp.headers.select{|k| k.eql? "Set-Cookie" }.map {|k,v| ["Cookie", v] }]
 
-        if resp.data['status'] == 204
+        if resp.data[:status] == 204
           nil
         else
           resp
@@ -83,13 +87,13 @@ module AbiquoAPIClient
       rescue Excon::Errors::HTTPStatusError => error
         case error.response.status
         when 401
-          raise AbiquoClient::InvalidCredentials, "Wrong username or password"
+          raise AbiquoAPIClient::InvalidCredentials, "Wrong username or password"
         when 403
-          raise AbiquoClient::Forbidden, "Not Authorized"
-        when 406
-          raise AbiquoClient::BadRequest, "Bad request"
+          raise AbiquoAPIClient::Forbidden, "Not Authorized"
+        when 406, 400
+          raise AbiquoAPIClient::BadRequest, "Bad request"
         when 415
-          raise AbiquoClient::UnsupportedMediaType, "Unsupported mediatype"
+          raise AbiquoAPIClient::UnsupportedMediaType, "Unsupported mediatype"
         else
           begin
             error_response = JSON.parse(error.response.body)
@@ -98,9 +102,9 @@ module AbiquoAPIClient
             error_text = error_response['collection'][0]['message']
 
           rescue
-            raise AbiquoClient::Error, error.response.body
+            raise AbiquoAPIClient::Error, error.response.body
           end
-          raise AbiquoClient::Error, "#{error_code} - #{error_text}"
+          raise AbiquoAPIClient::Error, "#{error_code} - #{error_text}"
         end
       end
     end

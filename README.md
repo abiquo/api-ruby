@@ -15,7 +15,7 @@ The client object contains 3 objects that allow API browsing.
 Represents an Abiquo API Link. Issuing ```get``` on them will retrieve link destination. This allows for things like:
 
 ```ruby
-vapp = vdc.virtualappliances.get.first
+vapp = vdc.link(:virtualappliances).get.first
 ```
 
 ## Generic model object
@@ -42,7 +42,7 @@ Is the User object returned by the API at login. You can browse the links provid
 ```ruby
 a.user
 
-vm = a.user.virtualmachines.get.first
+vm = a.user.link(:virtualmachines).get.first
 
 vm.name
 => "ABQ_6b6d9856-c05f-425e-8916-1ff7de1683e3"
@@ -77,10 +77,10 @@ v = a.get(l).first
 #### Create a new object
 
 ```ruby
-v1 = a.new_object(:name => "testmierder", 
+v1 = a.new_object(:name => "vdctest", 
                   :hypervisorType => "VMX_04", 
                   :vlan => v.vlan, 
-                  :links => [v.location, a.enterprise])
+                  :links => [v.link(:location), a.enterprise])
 v1.vlan.delete("links")
 v1.vlan.delete("id")
 v1.vlan.delete("tag")

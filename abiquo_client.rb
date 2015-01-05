@@ -41,14 +41,24 @@ class AbiquoClient
 
     self
   end
+  
+  def new_object(hash)
+    AbiquoClient::LinkModel.new(hash.merge({ :client => self}))
+  end
 
   def get(link, options = {})
-    resp = @http_client.request(
+    accept = options[:accept].nil? ? link.type : options.delete(:accept)
+
+    req_hash = {
       :expects  => [200],
       :method   => 'GET',
       :path     => link.href,
-      :accept   => link.type
-    )
+      :query    => options
+    }
+
+    req_hash[:accept] = accept unless accept.eql? ""
+    
+    resp = @http_client.request(req_hash)
 
     if resp.is_a? Array
       tmp_a = []
@@ -62,36 +72,40 @@ class AbiquoClient
     end
   end
 
-  def new_object(hash)
-    AbiquoClient::LinkModel.new(hash.merge({ :client => self}))
-  end
-
   def post(link, data, options = {})
-    AbiquoClient::LinkModel.new({ :client => self}.merge(
-      @http_client.request(
-        :expects  => [201, 202],
-        :method   => 'POST',
-        :path     => link.href,
-        :accept   => link.type,
-        :content  => link.type,
-        :body     => data.to_json,
-        :query    => options
-      )
-    ))
+    ctype = options[:content].nil? ? link.type : options.delete(:content)
+    accept = options[:accept].nil? ? link.type : options.delete(:accept)
+
+    req_hash = {
+      :method   => 'POST',
+      :path     => link.href,
+      :body     => data.to_json,
+      :query    => options
+    }
+
+    req_hash[:accept] = accept unless accept.eql? ""
+    req_hash[:content] = ctype unless ctype.eql? ""
+
+    resp = @http_client.request(req_hash)
+    resp.nil? ? nil : AbiquoClient::LinkModel.new({ :client => self}.merge(resp))
   end
 
   def put(link, data, options = {})
-    AbiquoClient::LinkModel.new({ :client => self}.merge(
-      @http_client.request(
-        :expects  => [200, 201, 202],
-        :method   => 'PUT',
-        :path     => link.href,
-        :accept   => link.type,
-        :content  => link.type,
-        :body     => data.to_json,
-        :query    => options
-      )
-    ))
+    ctype = options[:content].nil? ? link.type : options.delete(:content)
+    accept = options[:accept].nil? ? link.type : options.delete(:accept)
+
+    req_hash = {
+      :method   => 'PUT',
+      :path     => link.href,
+      :body     => data.to_json,
+      :query    => options
+    }
+
+    req_hash[:accept] = accept unless accept.eql? ""
+    req_hash[:content] = ctype unless ctype.eql? ""
+
+    resp = @http_client.request(req_hash)
+    resp.nil? ? nil : AbiquoClient::LinkModel.new({ :client => self}.merge(resp))
   end
 
   def delete(link, options = {})
