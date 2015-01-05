@@ -1,8 +1,9 @@
-require './lib/httpclient.rb'
-require './lib/link.rb'
-require './lib/model.rb'
+require 'abiquo-api/errors.rb'
+require 'abiquo-api/httpclient.rb'
+require 'abiquo-api/link.rb'
+require 'abiquo-api/model.rb'
 
-class AbiquoClient
+class AbiquoAPI
   include AbiquoAPIClient
 
   attr_reader :http_client
