@@ -2,6 +2,31 @@
 
 Basic API browsing and raw object manipulation for Ruby.
 
+## Installation
+
+To get the client installed just issue:
+
+```gem install abiquo-api```
+
+Or if you are using a Gemfile, add:
+
+```gem 'abiquo-api'```
+
+An example usage would be:
+
+```ruby
+require 'abiquo-api'
+
+a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
+                     :abiquo_username => "admin", 
+                     :abiquo_password => "xabiquo")
+
+l = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
+              :type => 'application/vnd.abiquo.virtualdatacenters+json')
+
+a.get(l)
+```
+
 ## Client object
 
 The client object contains 3 objects that allow API browsing.
@@ -29,7 +54,7 @@ This is used to map Abiquo API objects.
 #### Initialize connection
 
 ```ruby
-a = AbiquoClient.new(:abiquo_api_url => 'https://10.60.13.40/api', 
+a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
                      :abiquo_username => "admin", 
                      :abiquo_password => "xabiquo")
 ```
@@ -56,7 +81,7 @@ vm.id
 #### Initialize connection
 
 ```ruby
-a = AbiquoClient.new(:abiquo_api_url => 'https://10.60.13.40/api', 
+a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
                      :abiquo_username => "admin", 
                      :abiquo_password => "xabiquo")
 ```
@@ -64,7 +89,7 @@ a = AbiquoClient.new(:abiquo_api_url => 'https://10.60.13.40/api',
 #### Create a Link object to issue a request
 
 ```ruby
-l = AbiquoClient::Link.new(:href => '/api/cloud/virtualdatacenters', 
+l = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
               :type => 'application/vnd.abiquo.virtualdatacenters+json')
 ```
 
@@ -89,7 +114,7 @@ v1.vlan.delete("tag")
 #### Create a link where to post data
 
 ```ruby
-l1 = AbiquoClient::Link.new(:href => '/api/cloud/virtualdatacenters', 
+l1 = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
               :type => 'application/vnd.abiquo.virtualdatacenter+json')
 ```
 
