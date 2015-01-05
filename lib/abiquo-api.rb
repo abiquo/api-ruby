@@ -31,7 +31,7 @@ class AbiquoAPI
       :accept   => 'application/vnd.abiquo.user+json'
       )
     @enterprise = AbiquoAPIClient::Link.new(loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first)
-    @user = AbiquoClient::LinkModel.new(loginresp.merge({:client => self}))
+    @user = AbiquoAPIClient::LinkModel.new(loginresp.merge({:client => self}))
 
     @properties = @http_client.request(
       :expects  => [200],
@@ -44,7 +44,7 @@ class AbiquoAPI
   end
   
   def new_object(hash)
-    AbiquoClient::LinkModel.new(hash.merge({ :client => self}))
+    AbiquoAPIClient::LinkModel.new(hash.merge({ :client => self}))
   end
 
   def get(link, options = {})
@@ -64,12 +64,12 @@ class AbiquoAPI
     if resp.is_a? Array
       tmp_a = []
       resp.each do |r|
-        tmp_r = AbiquoClient::LinkModel.new(r.merge({:client => self}))
+        tmp_r = AbiquoAPIClient::LinkModel.new(r.merge({:client => self}))
         tmp_a << tmp_r
       end
       tmp_a
     else
-      AbiquoClient::LinkModel.new(resp.merge({ :client => self}))
+      AbiquoAPIClient::LinkModel.new(resp.merge({ :client => self}))
     end
   end
 
@@ -88,7 +88,7 @@ class AbiquoAPI
     req_hash[:content] = ctype unless ctype.eql? ""
 
     resp = @http_client.request(req_hash)
-    resp.nil? ? nil : AbiquoClient::LinkModel.new({ :client => self}.merge(resp))
+    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
   end
 
   def put(link, data, options = {})
@@ -106,7 +106,7 @@ class AbiquoAPI
     req_hash[:content] = ctype unless ctype.eql? ""
 
     resp = @http_client.request(req_hash)
-    resp.nil? ? nil : AbiquoClient::LinkModel.new({ :client => self}.merge(resp))
+    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
   end
 
   def delete(link, options = {})
