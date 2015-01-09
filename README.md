@@ -18,9 +18,24 @@ An example usage would be:
 require 'abiquo-api'
 
 a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
-                     :abiquo_username => "admin", 
-                     :abiquo_password => "xabiquo")
+                  :abiquo_username => "admin", 
+                  :abiquo_password => "xabiquo")
+```
 
+Or, if you want to force a specific API version:
+
+```ruby
+require 'abiquo-api'
+
+a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
+                  :abiquo_username => "admin", 
+                  :abiquo_password => "xabiquo",
+                  :version => "2.9")
+```
+
+Then you can start browsing the API:
+
+```ruby
 l = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
               :type => 'application/vnd.abiquo.virtualdatacenters+json')
 
