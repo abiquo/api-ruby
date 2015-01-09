@@ -39,7 +39,11 @@ module AbiquoAPIClient
       response = issue_request(params)
       return nil if response.nil?
       
-      response = JSON.parse(response.body) unless response.body.empty?
+      begin
+        response = JSON.parse(response.body) unless response.body.empty?
+      rescue
+        response = response.body
+      end
 
       # Handle pagination
       if not response['links'].nil? and response['links'].select {|l| l['rel'].eql? "next" }.count > 0

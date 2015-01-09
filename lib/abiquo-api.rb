@@ -11,6 +11,7 @@ class AbiquoAPI
   attr_accessor :enterprise
   attr_accessor :user
   attr_accessor :properties
+  attr_accessor :version
 
   def initialize(options = {})
     api_url = options[:abiquo_api_url]
@@ -40,6 +41,17 @@ class AbiquoAPI
       :accept   => 'application/vnd.abiquo.systemproperties+json'
       )
 
+    if options.has_key? :version
+      @version = options[:version][0..2]
+    else
+      @version = @http_client.request(
+            :expects  => [200],
+            :method   => 'GET',
+            :path     => "#{api_path}/version",
+            :accept   => 'text/plain'
+      ).delete("\n")[0..2]
+    end
+
     self
   end
   
@@ -57,7 +69,7 @@ class AbiquoAPI
       :query    => options
     }
 
-    req_hash[:accept] = accept unless accept.eql? ""
+    req_hash[:accept] = "#{accept}; version=#{@version};" unless accept.eql? ""
     
     resp = @http_client.request(req_hash)
 
@@ -84,8 +96,8 @@ class AbiquoAPI
       :query    => options
     }
 
-    req_hash[:accept] = accept unless accept.eql? ""
-    req_hash[:content] = ctype unless ctype.eql? ""
+    req_hash[:accept] = "#{accept}; version=#{@version};" unless accept.eql? ""
+    req_hash[:content] = "#{ctype}; version=#{@version};" unless ctype.eql? ""
 
     resp = @http_client.request(req_hash)
     resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
@@ -102,8 +114,8 @@ class AbiquoAPI
       :query    => options
     }
 
-    req_hash[:accept] = accept unless accept.eql? ""
-    req_hash[:content] = ctype unless ctype.eql? ""
+    req_hash[:accept] = "#{accept}; version=#{@version};" unless accept.eql? ""
+    req_hash[:content] = "#{ctype}; version=#{@version};" unless ctype.eql? ""
 
     resp = @http_client.request(req_hash)
     resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
