@@ -2,8 +2,6 @@ require 'formatador'
 
 module AbiquoAPIClient
   ##
-  # AbiquoAPIClient::LinkModel
-  #
   # Represents a resource in the Abiquo API.
   #
   class LinkModel
@@ -107,7 +105,7 @@ module AbiquoAPIClient
     # as parameter.
     #
     # Parameters:
-    #   link_rel:: The 'rel' value to look for, symbolized.
+    # [link_rel]  The 'rel' value to look for, symbolized.
     #
     # Returns the first link found with the 'rel' attribute 
     # specified or nil if not found.
@@ -121,7 +119,7 @@ module AbiquoAPIClient
     # specified as parameter.
     #
     # Parameters:
-    #   link_rel:: The 'rel' value to look for, symbolized.
+    # [link_rel]  The 'rel' value to look for, symbolized.
     #
     # Returns the true if the object has a link with the 
     # specified 'rel' or false otherwhise.
@@ -166,8 +164,8 @@ module AbiquoAPIClient
     # Creates a new method in the instance object.
     #
     # Parameters:
-    #   name:: The name of the method to be created.
-    #   &block:: The block of code for that method.
+    # [name]    The name of the method to be created.
+    # [&block]  The block of code for that method.
     #
     def create_method( name, &block )
       self.class.send( :define_method, name, &block )
@@ -177,9 +175,9 @@ module AbiquoAPIClient
     # Creates a new attribute for the instance object.
     #
     # Parameters:
-    #   name:: The name of the attribute to be created.
-    #   ro:: Boolean that specifies if the attribute will
-    #        read only or read write. Defaults to false (rw)
+    # [name]  The name of the attribute to be created.
+    # [ro]    Boolean that specifies if the attribute will
+    #         read only or read write. Defaults to false (rw)
     #
     def create_attr( name , ro = false)
       unless ro

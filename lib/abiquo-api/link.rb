@@ -2,8 +2,6 @@ require 'formatador'
 
 module AbiquoAPIClient
   ##
-  # AbiquoAPIClient::Link
-  #
   # Represents a link on the Abiquo API.
   #
   class Link
@@ -31,7 +29,7 @@ module AbiquoAPIClient
     # after parsing the JSON response.
     #
     # If the hash contains :client key, the value will be used
-    # as an AbiquoAPI client allowing the get method to retrieve
+    # as an {AbiquoAPI} client allowing the get method to retrieve
     # the target resource.
     #
     def initialize(hash)

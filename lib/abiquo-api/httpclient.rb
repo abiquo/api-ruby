@@ -11,6 +11,7 @@ module AbiquoAPIClient
   class HTTPClient
     ##
     # Excon connection object.
+    #
     attr_reader :connection
 
     ##
@@ -40,7 +41,7 @@ module AbiquoAPIClient
     # The public method called by the client.
     #
     # Parameters:
-    #   params:: A hash of options to be passed to the 
+    # [params]   A hash of options to be passed to the 
     #            Excon connection.
     # 
     # Returns a hash resulting of parsing the response
