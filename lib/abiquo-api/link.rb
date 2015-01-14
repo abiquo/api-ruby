@@ -1,12 +1,39 @@
 require 'formatador'
 
 module AbiquoAPIClient
+  ##
+  # AbiquoAPIClient::Link
+  #
+  # Represents a link on the Abiquo API.
+  #
   class Link
+    ##
+    # The target URL of the link
+    #
     attr_accessor :href
+    ##
+    # The 'rel' attribute of the link
+    #
     attr_accessor :rel
+    ##
+    # The title of the link
+    #
     attr_accessor :title
+    ##
+    # The media type of the link
+    #
     attr_accessor :type
 
+    ##
+    # Constructor.
+    #
+    # Accepts a hash reprsenting a link, usually returned
+    # after parsing the JSON response.
+    #
+    # If the hash contains :client key, the value will be used
+    # as an AbiquoAPI client allowing the get method to retrieve
+    # the target resource.
+    #
     def initialize(hash)
       @client = hash.delete(:client) if hash.keys.include?(:client)
 
@@ -18,10 +45,22 @@ module AbiquoAPIClient
       @type = h[:type].nil? ? '' : h[:type]
     end
 
+    ##
+    # If the :client attribute is not nil, will retrieve
+    # the resource that this link represents, or nil otherwise
+    #
     def get
-      @client.get(self)
+      if @client.nil?
+        return nil
+      else
+        @client.get(self)
+      end
     end
 
+    ##
+    # Converts an instance to its hash form, so it can be
+    # serialized as JSON.
+    #
     def to_hash
       h = self.href.nil? ? '' : self.href
       r = self.rel.nil? ? '' : self.rel
@@ -36,6 +75,9 @@ module AbiquoAPIClient
       }
     end
 
+    ##
+    # Pretty print the object.
+    #
     def inspect
       Thread.current[:formatador] ||= Formatador.new
       data = "#{Thread.current[:formatador].indentation}<#{self.class.name}"

@@ -1,8 +1,14 @@
+##
+# Ruby Abiquo API client
+#
 require 'abiquo-api/errors.rb'
 require 'abiquo-api/httpclient.rb'
 require 'abiquo-api/link.rb'
 require 'abiquo-api/model.rb'
 
+##
+# Main class
+#
 class AbiquoAPI
   include AbiquoAPIClient
 
@@ -13,6 +19,19 @@ class AbiquoAPI
   attr_accessor :properties
   attr_accessor :version
 
+  ##
+  # Constructor. Accepts a hash of options.
+  #
+  # Required options:
+  #   :abiquo_api_url:: The URL of the Abiquo API. ie. https://yourserver/api
+  #   :abiquo_username:: The username used to connect to the Abiquo API.
+  #   :abiquo_password:: The password for your user.
+  #
+  # Optional:
+  #   :version:: The Abiquo API version to include in each request.
+  #
+  # Returns an instance of the Abiquo API client.
+  #
   def initialize(options = {})
     api_url = options[:abiquo_api_url]
     api_username = options[:abiquo_username]
@@ -55,10 +74,31 @@ class AbiquoAPI
     self
   end
   
+  ##
+  # Returns a new instance of the AbiquoAPIClient::LinkModel class.
+  # 
+  # Parameters:
+  #   A hash of attributes to set in the object.
+  #
   def new_object(hash)
     AbiquoAPIClient::LinkModel.new(hash.merge({ :client => self}))
   end
 
+  ##
+  # Executes an HTTP GET over the AbiquoAPIClient::Link passed as parameter.
+  # 
+  # Required parameters:
+  #   link:: An instance of an AbiquoAPIClient::Link.
+  #
+  # Optional parameters:
+  #   options:: A hash of key/values that will be sent as query.
+  #
+  # NOTE. The option :accept will override Accept header sent in
+  #       the request.
+  #
+  # Returns an instance of the AbiquoAPIClient::LinkModel class representing
+  # the requested resource.
+  #
   def get(link, options = {})
     accept = options[:accept].nil? ? link.type : options.delete(:accept)
 
@@ -85,6 +125,24 @@ class AbiquoAPI
     end
   end
 
+  ##
+  # Executes an HTTP POST over the AbiquoAPIClient::Link passed as parameter.
+  # 
+  # Required parameters:
+  #   link:: An instance of an AbiquoAPIClient::Link.
+  #   data:: The data to send in the HTTP request. Usually an instance
+  #          of the AbiquoAPIClient::LinkModel instance. Will be 
+  #          serialized to JSON before sending.
+  #
+  # Optional parameters:
+  #   options:: A hash of key/values that will be sent as query.
+  #
+  # NOTE. The option :accept and :content options will override Accept 
+  #       and Content-Type headers sent in the request.
+  #
+  # Returns an instance of the AbiquoAPIClient::LinkModel class representing
+  # the requested resource or nil if the request returned empty.
+  #
   def post(link, data, options = {})
     ctype = options[:content].nil? ? link.type : options.delete(:content)
     accept = options[:accept].nil? ? link.type : options.delete(:accept)
@@ -103,6 +161,24 @@ class AbiquoAPI
     resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
   end
 
+  ##
+  # Executes an HTTP PUT over the AbiquoAPIClient::Link passed as parameter.
+  # 
+  # Required parameters:
+  #   link:: An instance of an AbiquoAPIClient::Link.
+  #   data:: The data to send in the HTTP request. Usually an instance
+  #          of the AbiquoAPIClient::LinkModel instance. Will be 
+  #          serialized to JSON before sending.
+  #
+  # Optional parameters:
+  #   options:: A hash of key/values that will be sent as query.
+  #
+  # NOTE. The option :accept and :content options will override Accept 
+  #       and Content-Type headers sent in the request.
+  #
+  # Returns an instance of the AbiquoAPIClient::LinkModel class representing
+  # the requested resource or nil if the request returned empty.
+  #
   def put(link, data, options = {})
     ctype = options[:content].nil? ? link.type : options.delete(:content)
     accept = options[:accept].nil? ? link.type : options.delete(:accept)
@@ -121,6 +197,17 @@ class AbiquoAPI
     resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
   end
 
+  ##
+  # Executes an HTTP DELETE over the AbiquoAPIClient::Link passed as parameter.
+  # 
+  # Required parameters:
+  #   link:: An instance of an AbiquoAPIClient::Link.
+  #
+  # Optional parameters:
+  #   options:: A hash of key/values that will be sent as query.
+  #
+  # Returns nil
+  #
   def delete(link, options = {})
     @http_client.request(
       :expects  => [204],
