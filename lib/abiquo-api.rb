@@ -166,6 +166,7 @@ class AbiquoAPI
     accept = options[:accept].nil? ? link.type : options.delete(:accept)
 
     req_hash = {
+      :expects  => [200, 201, 202, 204],
       :method   => 'POST',
       :path     => link.href,
       :body     => data.to_json,
@@ -202,6 +203,7 @@ class AbiquoAPI
     accept = options[:accept].nil? ? link.type : options.delete(:accept)
 
     req_hash = {
+      :expects  => [200, 201, 202, 204],
       :method   => 'PUT',
       :path     => link.href,
       :body     => data.to_json,
