@@ -47,11 +47,11 @@ module AbiquoAPIClient
     # If the :client attribute is not nil, will retrieve
     # the resource that this link represents, or nil otherwise
     #
-    def get
+    def get(options = {})
       if @client.nil?
         return nil
       else
-        @client.get(self)
+        @client.get(self, options)
       end
     end
 

@@ -135,8 +135,8 @@ module AbiquoAPIClient
     #
     # Returns a new instance representing the updated resource.
     #
-    def update
-      @client.put(self.link(:edit), self)
+    def update(options = {})
+      @client.put(self.link(:edit), self, options)
     end
 
     ##
@@ -145,8 +145,8 @@ module AbiquoAPIClient
     #
     # Returns nil on success.
     #
-    def delete
-      @client.delete(self.link(:edit))
+    def delete(options = {})
+      @client.delete(self.link(:edit), options)
     end
 
     ##
@@ -154,7 +154,7 @@ module AbiquoAPIClient
     #
     # Returns a new instance representing resource.
     #
-    def refresh
+    def refresh(options = {})
       self.link(:edit).get
     end
 

@@ -232,7 +232,8 @@ class AbiquoAPI
     @http_client.request(
       :expects  => [204],
       :method   => 'DELETE',
-      :path     => link.href
+      :path     => link.href,
+      :query    => options
     )
     nil
   end
