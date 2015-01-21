@@ -101,6 +101,13 @@ module AbiquoAPIClient
     end
 
     ##
+    # Returns an array of {AbiquoAPI::Link} for the resource
+    #
+    def links
+      self.links.map {|l| l.values }.flatten
+    end
+
+    ##
     # Retrieves the link that has the 'rel' attribute specified
     # as parameter.
     #
