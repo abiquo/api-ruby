@@ -45,13 +45,19 @@ module AbiquoAPIClient
 
     ##
     # If the :client attribute is not nil, will retrieve
-    # the resource that this link represents, or nil otherwise
+    # the resource or collection that this link represents,
+    # or nil otherwise
     #
     def get(options = {})
       if @client.nil?
         return nil
       else
-        @client.get(self, options)
+        r = @client.get(self, options)
+        if r.is_a? Hash
+          AbiquoAPI::LinkCollection.new(r, self.type, @client)
+        else
+          r
+        end
       end
     end
 

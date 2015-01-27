@@ -1,7 +1,8 @@
-require 'abiquo-api/errors.rb'
-require 'abiquo-api/httpclient.rb'
-require 'abiquo-api/link.rb'
-require 'abiquo-api/model.rb'
+require 'abiquo-api/collection'
+require 'abiquo-api/errors'
+require 'abiquo-api/httpclient'
+require 'abiquo-api/link'
+require 'abiquo-api/model'
 
 ##
 # Ruby Abiquo API client main class
@@ -101,6 +102,18 @@ class AbiquoAPI
   end
 
   ##
+  # Returns a new instance of the {AbiquoAPIClient::LinkCollection} 
+  # class.
+  # 
+  # Parameters:
+  #   An instance of {AbiquoAPIClient::Link} pointing to the URL of 
+  #   the collection.
+  #
+  def collection(link)
+    AbiquoAPI::LinkCollection.new(self.get(link), link.type, self)
+  end
+
+  ##
   # Executes an HTTP GET over the {AbiquoAPIClient::Link} passed as parameter.
   # 
   # Required parameters:
@@ -131,15 +144,10 @@ class AbiquoAPI
     
     resp = @http_client.request(req_hash)
 
-    if resp.is_a? Array
-      tmp_a = []
-      resp.each do |r|
-        tmp_r = AbiquoAPIClient::LinkModel.new(r.merge({:client => self}))
-        tmp_a << tmp_r
-      end
-      tmp_a
-    else
+    if resp['collection'].nil?
       AbiquoAPIClient::LinkModel.new(resp.merge({ :client => self}))
+    else
+      resp
     end
   end
 
