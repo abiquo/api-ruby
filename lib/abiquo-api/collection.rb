@@ -5,12 +5,8 @@ module AbiquoAPIClient
   # Represents a collection of resources in the Abiquo API.
   #
   class LinkCollection
-    include Enumerable
-
-    attr_reader :size
-
     def initialize(parsed_response, type, client)
-      @size = parsed_response['totalSize'].nil? ? 0 : parsed_response['totalSize']
+      @size = parsed_response['totalSize'].nil? ? parsed_response['collection'].count : parsed_response['totalSize']
       if type.include? ";"
         @type = type.split(';').first
       else
@@ -37,17 +33,22 @@ module AbiquoAPIClient
     # Returns the total size of the collection
     #
     def size
-      @size || 0
+      @size
     end
+    alias count size
 
     ##
     # Returns the first element in the collection
     #
     def first(count = nil)
       if count.nil?
-        self[0]
+        @collection[0]
       else
-        self[0..count]
+        out = []
+        (0..count).each do |i|
+          out << @collection[i]
+        end
+        out
       end
     end
 
@@ -55,14 +56,22 @@ module AbiquoAPIClient
     # Returns the last element in the collection
     #
     def last
-      self[size() - 1]
+      out = nil
+
+      each {|i| out = i }
+      
+      out
     end
 
     ##
     # Returns an array representing the collection
     #
     def to_a
-      @collection[0..(@size - 1)]
+      out = []
+
+      each { |e| out << e }
+
+      out
     end
 
     ##
@@ -96,31 +105,25 @@ module AbiquoAPIClient
     def each
       if block_given?
         (0..@size - 1).each do |i|
-          yield self[i]
+          if i > @collection.count - 1 and i < @size
+            # locate the page where the i-th item is
+            page = i / @page_size + 1
+            startwith = ( page - 1 ) * @page_size
+            link_next = @links.select {|l| l['rel'].eql? "next" }.first
+            
+            l = AbiquoAPIClient::Link.new(:href => link_next['href'],
+                                          :type => @type)
+            resp = @client.get(l, :startwith => startwith, :limit => @page_size)
+
+            items = resp['collection'].map {|e| @client.new_object(e) }
+            @collection.concat(items)
+          end
+
+          yield @collection[i]
         end
       else
         self.to_enum
       end
-    end
-
-    ##
-    # Retrieves the item of the collection at index i
-    #
-    def [](i)
-      if i > @collection.count - 1 and i < @size
-        # locate the page where the i-th item is
-        page = i / @page_size + 1
-        startwith = ( page - 1 ) * @page_size
-
-        l = AbiquoAPIClient::Link.new(:href => @path,
-                                      :type => @type)
-        resp = @client.get(l, :startwith => startwith, :limit => @page_size)
-
-        items = resp['collection'].map {|e| @client.new_object(e) }
-        @collection.concat(items)
-      end
-
-      @collection[i]
     end
 
     ##

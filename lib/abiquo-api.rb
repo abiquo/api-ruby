@@ -109,8 +109,8 @@ class AbiquoAPI
   #   An instance of {AbiquoAPIClient::Link} pointing to the URL of 
   #   the collection.
   #
-  def collection(link)
-    AbiquoAPI::LinkCollection.new(self.get(link), link.type, self)
+  def list(link, options = {})
+    AbiquoAPI::LinkCollection.new(self.get(link, options), link.type, self)
   end
 
   ##
