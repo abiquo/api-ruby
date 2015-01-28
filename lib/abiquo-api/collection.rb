@@ -20,9 +20,11 @@ module AbiquoAPIClient
         opts = coluri.query
         opt_hash = opts.split("&").map{|e| { e.split("=").first.to_sym => e.split("=").last }}.reduce({}) {|h,pairs| pairs.each {|k,v| h[k] ||= v}; h}
         @page_size = opt_hash[:limit].to_i
+
+        st = opt_hash[:startwith].nil? ? 0 : opt_hash[:startwith].to_i
+        @current_page = (st / @page_size) + 1
         
         @links = parsed_response['links']
-        @next = @links.select {|l| l['rel'].eql? "next" }.first
       end
 
       @collection = parsed_response['collection'].map {|r| client.new_object(r)}
@@ -105,21 +107,20 @@ module AbiquoAPIClient
     #
     def each
       if block_given?
-        (0..@size - 1).each do |i|
-          if i > @collection.count - 1 and i < @size
-            q = URI.parse(@next['href']).query.split('&').map {|it| it.split('=') }
-            opts = Hash[q.map{ |k, v| [k.to_sym, v] }]
+        unless @current_page == 1
+          next_page = retrieve('first')
+          @collection = next_page.nil? ? [] : next_page
+        end
 
-            l = AbiquoAPIClient::Link.new(:href => @next['href'],
-                                          :type => @type)
-            resp = @client.get(l, opts)
-            @next = resp['links'].select {|li| li['rel'] == 'next' }.first
-
-            items = resp['collection'].map {|e| @client.new_object(e) }
-            @collection.concat(items)
+        loop do 
+          @collection.each do |item|
+            yield item
           end
-
-          yield @collection[i]
+      
+          break if @links.nil? or @links.select {|l| l['rel'].eql? "next" }.first.nil?
+          
+          next_page = retrieve('next')
+          @collection = next_page.nil? ? [] : next_page
         end
       else
         self.to_enum
@@ -143,6 +144,28 @@ module AbiquoAPIClient
       end
       data << " >"
       data
+    end
+
+    private
+
+    def retrieve(rel)
+      return nil if @links.nil?
+      f = @links.select {|l| l['rel'].eql? rel }.first
+      return nil if f.nil?
+
+      q = URI.parse(f['href']).query.split('&').map {|it| it.split('=') }
+      opts = Hash[q.map{ |k, v| [k.to_sym, v] }]
+
+      l = AbiquoAPIClient::Link.new(:href => f['href'],
+                                    :type => @type)
+      resp = @client.get(l, opts)      
+      
+      st = opts[:startwith].nil? ? 0 : opts[:startwith].to_i
+      @current_page = (st / @page_size) + 1
+
+      @links = resp['links']
+
+      resp['collection'].map {|e| @client.new_object(e) }
     end
   end
 end
