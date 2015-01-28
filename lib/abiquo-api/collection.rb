@@ -22,6 +22,7 @@ module AbiquoAPIClient
         @page_size = opt_hash[:limit].to_i
         
         @links = parsed_response['links']
+        @next = @links.select {|l| l['rel'].eql? "next" }.first
       end
 
       @collection = parsed_response['collection'].map {|r| client.new_object(r)}
@@ -42,11 +43,11 @@ module AbiquoAPIClient
     #
     def first(count = nil)
       if count.nil?
-        @collection[0]
+        @collection.first
       else
         out = []
-        (0..count).each do |i|
-          out << @collection[i]
+        @collection.first(count).each do |item|
+          out << item
         end
         out
       end
@@ -106,14 +107,13 @@ module AbiquoAPIClient
       if block_given?
         (0..@size - 1).each do |i|
           if i > @collection.count - 1 and i < @size
-            # locate the page where the i-th item is
-            page = i / @page_size + 1
-            startwith = ( page - 1 ) * @page_size
-            link_next = @links.select {|l| l['rel'].eql? "next" }.first
-            
-            l = AbiquoAPIClient::Link.new(:href => link_next['href'],
+            q = URI.parse(@next['href']).query.split('&').map {|it| it.split('=') }
+            opts = Hash[q.map{ |k, v| [k.to_sym, v] }]
+
+            l = AbiquoAPIClient::Link.new(:href => @next['href'],
                                           :type => @type)
-            resp = @client.get(l, :startwith => startwith, :limit => @page_size)
+            resp = @client.get(l, opts)
+            @next = resp['links'].select {|li| li['rel'] == 'next' }.first
 
             items = resp['collection'].map {|e| @client.new_object(e) }
             @collection.concat(items)

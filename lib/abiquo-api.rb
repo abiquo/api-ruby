@@ -29,11 +29,6 @@ class AbiquoAPI
   attr_accessor :user
 
   ##
-  # The config properties for the UI.
-  #
-  attr_accessor :properties
-
-  ##
   # The Abiquo API version used by this client.
   #
   attr_accessor :version
@@ -70,13 +65,6 @@ class AbiquoAPI
     @enterprise = AbiquoAPIClient::Link.new(loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first)
     @user = AbiquoAPIClient::LinkModel.new(loginresp.merge({:client => self}))
 
-    @properties = @http_client.request(
-      :expects  => [200],
-      :method   => 'GET',
-      :path     => "#{api_path}/config/properties",
-      :accept   => 'application/vnd.abiquo.systemproperties+json'
-      )
-
     if options.has_key? :version
       @version = options[:version][0..2]
     else
@@ -89,6 +77,18 @@ class AbiquoAPI
     end
 
     self
+  end
+
+  ##
+  # Loads System properties
+  #
+  def properties
+    @http_client.request(
+      :expects  => [200],
+      :method   => 'GET',
+      :path     => "#{api_path}/config/properties",
+      :accept   => 'application/vnd.abiquo.systemproperties+json'
+    )
   end
   
   ##
