@@ -108,17 +108,25 @@ module AbiquoAPIClient
     end
 
     ##
-    # Retrieves the link that has the 'rel' attribute specified
-    # as parameter.
+    # Retrieves the link or links that hve the 'rel' attribute 
+    # specified as parameter.
     #
     # Parameters:
     # [link_rel]  The 'rel' value to look for, symbolized.
     #
-    # Returns the first link found with the 'rel' attribute 
+    # Returns the link the 'rel' attribute 
     # specified or nil if not found.
     #
     def link(link_rel)
-      self.links.select {|l| l[link_rel] }.first[link_rel]
+      ls = self.links.select {|l| l[link_rel] }.map { |t| t.values }.flatten
+      case ls.count
+      when 1
+        ls.first
+      when 0
+        nil
+      else
+        ls
+      end
     end
 
     ##

@@ -76,33 +76,6 @@ module AbiquoAPIClient
       rescue
         response = response.body
       end
-
-      # Handle pagination
-      if not response['links'].nil? and response['links'].select {|l| l['rel'].eql? "next" }.count > 0
-        items = []
-        items = items + response['collection'] if not response['collection'].nil?
-        
-        loop do
-          next_url = response['links'].select {|l| l['rel'].eql? "next" }.first['href']
-          uri = URI.parse(next_url)
-          params[:path] = uri.path
-          params[:query] = uri.query
-          params[:headers] = headers
-          response = issue_request(params)
-          response = JSON.parse(response.body) unless response.body.empty?
-          items = items + response['collection'] if not response['collection'].nil?
-          
-          break if response['links'].select {|l| l['rel'].eql? "next" }.count == 0
-        end
-
-        items
-      else
-        if not response['collection'].nil?
-          response['collection']
-        else
-          response.nil? ? nil : response
-        end
-      end
     end
 
     private

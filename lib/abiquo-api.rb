@@ -1,7 +1,8 @@
-require 'abiquo-api/errors.rb'
-require 'abiquo-api/httpclient.rb'
-require 'abiquo-api/link.rb'
-require 'abiquo-api/model.rb'
+require 'abiquo-api/collection'
+require 'abiquo-api/errors'
+require 'abiquo-api/httpclient'
+require 'abiquo-api/link'
+require 'abiquo-api/model'
 
 ##
 # Ruby Abiquo API client main class
@@ -26,11 +27,6 @@ class AbiquoAPI
   # the current user.
   #
   attr_accessor :user
-
-  ##
-  # The config properties for the UI.
-  #
-  attr_accessor :properties
 
   ##
   # The Abiquo API version used by this client.
@@ -69,13 +65,6 @@ class AbiquoAPI
     @enterprise = AbiquoAPIClient::Link.new(loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first)
     @user = AbiquoAPIClient::LinkModel.new(loginresp.merge({:client => self}))
 
-    @properties = @http_client.request(
-      :expects  => [200],
-      :method   => 'GET',
-      :path     => "#{api_path}/config/properties",
-      :accept   => 'application/vnd.abiquo.systemproperties+json'
-      )
-
     if options.has_key? :version
       @version = options[:version][0..2]
     else
@@ -89,6 +78,18 @@ class AbiquoAPI
 
     self
   end
+
+  ##
+  # Loads System properties
+  #
+  def properties
+    @http_client.request(
+      :expects  => [200],
+      :method   => 'GET',
+      :path     => "#{api_path}/config/properties",
+      :accept   => 'application/vnd.abiquo.systemproperties+json'
+    )
+  end
   
   ##
   # Returns a new instance of the {AbiquoAPIClient::LinkModel} class.
@@ -98,6 +99,18 @@ class AbiquoAPI
   #
   def new_object(hash)
     AbiquoAPIClient::LinkModel.new(hash.merge({ :client => self}))
+  end
+
+  ##
+  # Returns a new instance of the {AbiquoAPIClient::LinkCollection} 
+  # class.
+  # 
+  # Parameters:
+  #   An instance of {AbiquoAPIClient::Link} pointing to the URL of 
+  #   the collection.
+  #
+  def list(link, options = {})
+    AbiquoAPI::LinkCollection.new(self.get(link, options), link.type, self)
   end
 
   ##
@@ -131,15 +144,10 @@ class AbiquoAPI
     
     resp = @http_client.request(req_hash)
 
-    if resp.is_a? Array
-      tmp_a = []
-      resp.each do |r|
-        tmp_r = AbiquoAPIClient::LinkModel.new(r.merge({:client => self}))
-        tmp_a << tmp_r
-      end
-      tmp_a
-    else
+    if resp['collection'].nil?
       AbiquoAPIClient::LinkModel.new(resp.merge({ :client => self}))
+    else
+      resp
     end
   end
 
