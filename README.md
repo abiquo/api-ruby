@@ -27,7 +27,7 @@ Or, if you want to force a specific API version:
 ```ruby
 require 'abiquo-api'
 
-a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
+abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
                   :abiquo_username => "admin", 
                   :abiquo_password => "xabiquo",
                   :version => "2.9")
@@ -37,9 +37,10 @@ Then you can start browsing the API:
 
 ```ruby
 l = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
-              :type => 'application/vnd.abiquo.virtualdatacenters+json')
+              :type => 'application/vnd.abiquo.virtualdatacenters+json',
+              :client => abq)
 
-a.get(l)
+l.get
 ```
 
 ## Client object
@@ -61,6 +62,10 @@ vapp = vdc.link(:virtualappliances).get.first
 ## Generic model object
 
 This is used to map Abiquo API objects.
+
+## Generic list
+
+This is used to iterate over paginated lists. 
 
 ## Examples
 
