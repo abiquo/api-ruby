@@ -109,7 +109,7 @@ module AbiquoAPIClient
     #
     def each
       if block_given?
-        unless @current_page == 1
+        unless @current_page == 1 or @current_page.nil?
           next_page = retrieve('first')
           @collection = next_page.nil? ? [] : next_page
         end
