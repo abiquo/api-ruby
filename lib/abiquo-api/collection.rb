@@ -18,11 +18,13 @@ module AbiquoAPIClient
         @path = coluri.path
 
         opts = coluri.query
-        opt_hash = opts.split("&").map{|e| { e.split("=").first.to_sym => e.split("=").last }}.reduce({}) {|h,pairs| pairs.each {|k,v| h[k] ||= v}; h}
-        @page_size = opt_hash[:limit].to_i
+        unless opts.nil?
+          opt_hash = opts.split("&").map{|e| { e.split("=").first.to_sym => e.split("=").last }}.reduce({}) {|h,pairs| pairs.each {|k,v| h[k] ||= v}; h}
+          @page_size = opt_hash[:limit].to_i
 
-        st = opt_hash[:startwith].nil? ? 0 : opt_hash[:startwith].to_i
-        @current_page = (st / @page_size) + 1
+          st = opt_hash[:startwith].nil? ? 0 : opt_hash[:startwith].to_i
+          @current_page = (st / @page_size) + 1
+        end
         
         @links = parsed_response['links']
       end
