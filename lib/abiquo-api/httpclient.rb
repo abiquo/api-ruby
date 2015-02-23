@@ -28,12 +28,24 @@ module AbiquoAPIClient
     #   :abiquo_api_url:: The URL of the Abiquo API. ie. https://yourserver/api
     #   :abiquo_username:: The username used to connect to the Abiquo API.
     #   :abiquo_password:: The password for your user.
+    #   :connection_options:: { :connect_timeout => <time_in_secs>, :read_timeout => <time_in_secs>, :write_timeout => <time_in_secs>,
+    #                           :ssl_verify_peer => <true_or_false>, :ssl_ca_path => <path_to_ca_file> }
     #
-    def initialize(api_url, api_username, api_password)
-      Excon.defaults[:ssl_verify_peer] = false
+    def initialize(api_url, api_username, api_password, connection_options)
+      Excon.defaults[:ssl_ca_path] = connection_options[:ssl_ca_path] || ''
+      Excon.defaults[:ssl_verify_peer] = connection_options[:ssl_verify_peer] || false
+
+      connect_timeout  = connection_options[:connect_timeout] || 60
+      read_timeout = connection_options[:read_timeout] || 60
+      write_timeout = connection_options[:write_timeout] || 60
+
       @connection = Excon.new(api_url, 
                             :user => api_username, 
-                            :password => api_password )
+                            :password => api_password,
+                            :connect_timeout => connect_timeout,
+                            :read_timeout => read_timeout,
+                            :write_timeout => write_timeout)
+
       self
     end
 

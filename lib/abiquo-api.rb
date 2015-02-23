@@ -38,22 +38,31 @@ class AbiquoAPI
   #
   # Required options:
   #
-  #   :abiquo_api_url  => The URL of the Abiquo API. ie. https://yourserver/api
-  #   :abiquo_username => The username used to connect to the Abiquo API.
-  #   :abiquo_password => The password for your user.
-  #   :version         => The Abiquo API version to include in each request.
-  #                       Defaults to whatever is returned in the /api/version resource
+  #   :abiquo_api_url     => The URL of the Abiquo API. ie. https://yourserver/api
+  #   :abiquo_username    => The username used to connect to the Abiquo API.
+  #   :abiquo_password    => The password for your user.
+  #   :version            => The Abiquo API version to include in each request.
+  #                          Defaults to whatever is returned in the /api/version resource
+  #   :connection_options => Excon HTTP client connection options.
+  #                          { :connect_timeout => <time_in_secs>,
+  #                            :read_timeout => <time_in_secs>,
+  #                            :write_timeout => <time_in_secs>,
+  #                            :ssl_verify_peer => <true_or_false>,
+  #                            :ssl_ca_path => <path_to_ca_file> }
   #
   def initialize(options = {})
     api_url = options[:abiquo_api_url]
     api_username = options[:abiquo_username]
     api_password = options[:abiquo_password]
+    connection_options = options[:connection_options] || {}
 
     raise "You need to set :abiquo_api_url, :abiquo_username and :abiquo_password" if api_url.nil? or api_username.nil? or api_password.nil?
 
     @http_client = AbiquoAPIClient::HTTPClient.new(api_url,
                                                   api_username,
-                                                  api_password)
+                                                  api_password,
+                                                  connection_options)
+
     api_path = URI.parse(api_url).path
 
     loginresp = @http_client.request(

@@ -33,6 +33,22 @@ abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
                   :version => "2.9")
 ```
 
+You can also define some connection parameters that will be applied to HTTP connection:
+
+```ruby
+require 'abiquo-api'
+
+abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
+                  :abiquo_username => "admin",
+                  :abiquo_password => "xabiquo",
+                  :connection_options => {
+                      :connect_timeout => 30,
+                      :read_timeout => 120,
+                      :write_timeout => 120,
+                      :ssl_verify_peer => true,
+                      :ssl_ca_path => "/etc/pki/tls/private/myCA.crt" })
+```
+
 Then you can start browsing the API:
 
 ```ruby
