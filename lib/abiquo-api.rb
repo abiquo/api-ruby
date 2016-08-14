@@ -182,11 +182,13 @@ class AbiquoAPI
     ctype = options[:content].nil? ? link.type : options.delete(:content)
     accept = options[:accept].nil? ? link.type : options.delete(:accept)
 
+    data = data.to_json if data.respond_to?('to_json')
+
     req_hash = {
       :expects  => [200, 201, 202, 204],
       :method   => 'POST',
       :path     => link.href,
-      :body     => data.to_json,
+      :body     => data,
       :query    => options
     }
 
