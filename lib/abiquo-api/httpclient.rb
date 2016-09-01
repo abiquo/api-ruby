@@ -65,15 +65,17 @@ module AbiquoAPIClient
       params.reject!{|k,v| v.nil?}
 
       # Setup Accept and Content-Type headers
-      headers={}
+      headers = {}
       headers.merge!('Accept' => params.delete(:accept)) if params.has_key?(:accept)
       headers.merge!('Content-Type' => params.delete(:content)) if params.has_key?(:content)
 
       # Set Auth cookie and delete user and password if present
-      @connection.data.delete(:user) unless @connection.data[:user].nil?
-      @connection.data.delete(:password) unless @connection.data[:password].nil?
-      headers.merge!(@cookies) unless @cookies.nil?
-      
+      unless @cookies.nil?
+        @connection.data.delete(:user) unless @connection.data[:user].nil?
+        @connection.data.delete(:password) unless @connection.data[:password].nil?
+        headers.merge!(@cookies)
+      end
+
       params[:headers] = headers
 
       # Correct API path
@@ -100,6 +102,7 @@ module AbiquoAPIClient
     #
     def issue_request(options)
       begin
+        options[:headers].merge!(@connection.headers)
         resp = @connection.request(options)
 
         # Save cookies
