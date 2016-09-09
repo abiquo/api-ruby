@@ -54,13 +54,32 @@ class AbiquoAPI
     api_url = options[:abiquo_api_url]
     api_username = options[:abiquo_username]
     api_password = options[:abiquo_password]
+    api_key = options[:abiquo_api_key]
+    api_secret = options[:abiquo_api_secret]
+    token_key = options[:abiquo_token_key]
+    token_secret = options[:abiquo_token_secret]
     connection_options = options[:connection_options] || {}
 
-    raise "You need to set :abiquo_api_url, :abiquo_username and :abiquo_password" if api_url.nil? or api_username.nil? or api_password.nil?
+    raise "You need to set :abiquo_api_url" if api_url.nil?
+    raise "You need to provide either basic auth or oauth credentials!!" if (api_username.nil? or api_password.nil?) and 
+          (api_key.nil? or api_secret.nil? or token_key.nil? or token_secret.nil?)
+
+    unless api_key.nil?
+      credentials = {
+        :consumer_key => api_key,
+        :consumer_secret => api_secret,
+        :token => token_key,
+        :token_secret => token_secret
+      }
+    else
+      credentials = {
+        :api_username => api_username,
+        :api_password => api_password
+      }
+    end
 
     @http_client = AbiquoAPIClient::HTTPClient.new(api_url,
-                                                  api_username,
-                                                  api_password,
+                                                  credentials,
                                                   connection_options)
 
     api_path = URI.parse(api_url).path
@@ -150,7 +169,6 @@ class AbiquoAPI
     }
 
     req_hash[:accept] = "#{accept}; version=#{@version};" unless accept.eql? ""
-    
     resp = @http_client.request(req_hash)
 
     if resp['collection'].nil?
