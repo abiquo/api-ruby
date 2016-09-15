@@ -12,7 +12,7 @@ module AbiquoAPIClient
       else
         @type = type
       end
-      
+
       unless parsed_response['links'].empty?
         coluri = URI.parse(parsed_response['links'].first['href'])
         @path = coluri.path
@@ -23,14 +23,17 @@ module AbiquoAPIClient
           @page_size = opt_hash[:limit].to_i
 
           st = opt_hash[:startwith].nil? ? 0 : opt_hash[:startwith].to_i
-          @current_page = (st / @page_size) + 1
+          @current_page = case
+            when @page_size == 0 then st
+            when @page_size  > 0 then (st / @page_size) + 1
+            end
         end
-        
+
         @links = parsed_response['links']
       end
 
       @collection = parsed_response['collection'].map {|r| client.new_object(r)}
-      
+
       @client = client
     end
 
@@ -64,7 +67,7 @@ module AbiquoAPIClient
       out = nil
 
       each {|i| out = i }
-      
+
       out
     end
 
@@ -114,13 +117,13 @@ module AbiquoAPIClient
           @collection = next_page.nil? ? [] : next_page
         end
 
-        loop do 
+        loop do
           @collection.each do |item|
             yield item
           end
-      
+
           break if @links.nil? or @links.select {|l| l['rel'].eql? "next" }.first.nil?
-          
+
           next_page = retrieve('next')
           @collection = next_page.nil? ? [] : next_page
         end
@@ -160,10 +163,13 @@ module AbiquoAPIClient
 
       l = AbiquoAPIClient::Link.new(:href => f['href'],
                                     :type => @type)
-      resp = @client.get(l, opts)      
-      
+      resp = @client.get(l, opts)
+
       st = opts[:startwith].nil? ? 0 : opts[:startwith].to_i
-      @current_page = (st / @page_size) + 1
+      @current_page = case
+        when @page_size == 0 then st
+        when @page_size  > 0 then (st / @page_size) + 1
+        end
 
       @links = resp['links']
 
