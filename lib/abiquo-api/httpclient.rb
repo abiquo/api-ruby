@@ -141,7 +141,11 @@ module AbiquoAPIClient
         when 404
           raise AbiquoAPIClient::NotFound, "Not Found - #{error_code} - #{error_text}"
         else
-          raise AbiquoAPIClient::Error, "#{error.response.body} - #{error_code} - #{error_text}"
+          if error_code == '' and error_text == '' # Error and no json response
+            raise AbiquoAPIClient::Error, "#{resp.body}"
+          else # error with json response
+            raise AbiquoAPIClient::Error, "#{error_code} - #{error_text}"
+          end
         end 
       else
         resp
