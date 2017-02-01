@@ -22,5 +22,5 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "simple_oauth", '~> 0.3.1', '>= 0.3.1'
   gem.add_runtime_dependency "addressable", '~> 2.4.0', '>= 2.4.0'
   gem.add_runtime_dependency "formatador", '~> 0.2', '>= 0.2.5'
-  gem.add_runtime_dependency "json", '~> 1.8', '>= 1.8.0'
+  gem.add_runtime_dependency "json", '~> 2.0', '>= 2.0.2'
 end
