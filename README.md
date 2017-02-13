@@ -28,25 +28,41 @@ Or, if you want to force a specific API version:
 require 'abiquo-api'
 
 abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
-                  :abiquo_username => "admin", 
-                  :abiquo_password => "xabiquo",
-                  :version => "2.9")
+                    :abiquo_username => "admin", 
+                    :abiquo_password => "xabiquo",
+                    :version => "2.9")
 ```
 
-You can also define some connection parameters that will be applied to HTTP connection:
+You can also define some connection parameters that will be applied to the underlying Faraday HTTP connection:
 
 ```ruby
 require 'abiquo-api'
 
 abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
-                  :abiquo_username => "admin",
-                  :abiquo_password => "xabiquo",
-                  :connection_options => {
-                      :connect_timeout => 30,
-                      :read_timeout => 120,
-                      :write_timeout => 120,
-                      :ssl_verify_peer => true,
-                      :ssl_ca_path => "/etc/pki/tls/private/myCA.crt" })
+                    :abiquo_username => "admin",
+                    :abiquo_password => "xabiquo",
+                    :connection_options => {
+                      :ssl => {
+                        :verify => false
+                      }
+                    })
+```
+
+Or, you can also use OAuth credentials:
+
+```
+require 'abiquo-api'
+
+abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
+                    :abiquo_api_key => "somekey",
+                    :abiquo_api_secret => "somesecret",
+                    :abiquo_token_key => "sometoken",
+                    :abiquo_token_secret => "sometokensecret",
+                    :connection_options => {
+                      :ssl => {
+                        :verify => false
+                      }
+                    })
 ```
 
 Then you can start browsing the API:
