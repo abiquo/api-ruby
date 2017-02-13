@@ -50,7 +50,7 @@ abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
 
 Or, you can also use OAuth credentials:
 
-```
+```ruby
 require 'abiquo-api'
 
 abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
