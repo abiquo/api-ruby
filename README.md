@@ -68,24 +68,23 @@ abq = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api',
 Then you can start browsing the API:
 
 ```ruby
-l = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
-              :type => 'application/vnd.abiquo.virtualdatacenters+json',
-              :client => abq)
+l = AbiquoAPI::Link.new(:href => 'cloud/virtualdatacenters', 
+                        :type => 'application/vnd.abiquo.virtualdatacenters+json',
+                        :client => abq)
 
 l.get
 ```
 
 ## Client object
 
-The client object contains 3 objects that allow API browsing.
+The client object contains 2 methods that allow API browsing.
 
-- **user.** The user object returned by the ```/api/login``` call.
-- **enterprise.** The user's enterprise link to be used in new objects.
-- **properties.** A hash containing all the system properties in the system. Useful to get default values for some objects (ie. VLAN parameters in VDC creation).
+- **login** Makes the `login` API call, returning the current user information. From there you can navigate to related objects.
+- **properties** Makes the `config/properties` call and returns a hash containing all the system properties in the system. Useful to get default values for some objects (ie. VLAN parameters in VDC creation).
 
 ## Link object
 
-Represents an Abiquo API Link. Issuing ```get``` on them will retrieve link destination. This allows for things like:
+Represents an Abiquo API Link. Issuing `get` on them will retrieve link destination. This allows for things like:
 
 ```ruby
 vapp = vdc.link(:virtualappliances).get.first
@@ -107,19 +106,19 @@ This is used to iterate over paginated lists.
 
 ```ruby
 a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
-                     :abiquo_username => "admin", 
-                     :abiquo_password => "xabiquo")
+                  :abiquo_username => "admin", 
+                  :abiquo_password => "xabiquo")
 ```
 
 
-#### User object
+#### Login call
 
 Is the User object returned by the API at login. You can browse the links provided like:
 
 ```ruby
-a.user
+user = a.login
 
-vm = a.user.link(:virtualmachines).get.first
+vm = user.link(:virtualmachines).get.first
 
 vm.name
 => "ABQ_6b6d9856-c05f-425e-8916-1ff7de1683e3"
@@ -134,21 +133,22 @@ vm.id
 
 ```ruby
 a = AbiquoAPI.new(:abiquo_api_url => 'https://10.60.13.40/api', 
-                     :abiquo_username => "admin", 
-                     :abiquo_password => "xabiquo")
+                  :abiquo_username => "admin", 
+                  :abiquo_password => "xabiquo")
 ```
 
 #### Create a Link object to issue a request
 
 ```ruby
 l = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
-              :type => 'application/vnd.abiquo.virtualdatacenters+json')
+                        :type => 'application/vnd.abiquo.virtualdatacenters+json',
+                        :client => a)
 ```
 
 #### Get on the link
 
 ```ruby
-v = a.get(l).first
+v = l.get.first
 ```
 
 #### Create a new object
@@ -167,7 +167,7 @@ v1.vlan.delete("tag")
 
 ```ruby
 l1 = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters', 
-              :type => 'application/vnd.abiquo.virtualdatacenter+json')
+                         :type => 'application/vnd.abiquo.virtualdatacenter+json')
 ```
 
 #### Post data

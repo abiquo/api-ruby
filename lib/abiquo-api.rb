@@ -82,29 +82,33 @@ class AbiquoAPI
                                                   credentials,
                                                   connection_options)
 
-    api_path = URI.parse(api_url).path
-
-    loginresp = @http_client.request(
-      :expects  => [200],
-      :method   => 'GET',
-      :path     => "#{api_path}/login",
-      :accept   => 'application/vnd.abiquo.user+json'
-      )
-    @enterprise = AbiquoAPIClient::Link.new(loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first)
-    @user = AbiquoAPIClient::LinkModel.new(loginresp.merge({:client => self}))
-
     if options.has_key? :version
       @version = options[:version][0..2]
     else
       @version = @http_client.request(
             :expects  => [200],
             :method   => 'GET',
-            :path     => "#{api_path}/version",
+            :path     => "version",
             :accept   => 'text/plain'
       ).delete("\n")[0..2]
     end
 
     self
+  end
+
+  ##
+  # Performs a `login` call to Abiquo to retrieve
+  # user related info
+  #
+  def login
+    loginresp = @http_client.request(
+      :expects  => [200],
+      :method   => 'GET',
+      :path     => "login",
+      :accept   => 'application/vnd.abiquo.user+json'
+      )
+    @enterprise = AbiquoAPIClient::Link.new(loginresp['links'].select {|l| l['rel'] == 'enterprise'}.first)
+    @user = AbiquoAPIClient::LinkModel.new(loginresp.merge({:client => self}))
   end
 
   ##
@@ -114,7 +118,7 @@ class AbiquoAPI
     @http_client.request(
       :expects  => [200],
       :method   => 'GET',
-      :path     => "#{api_path}/config/properties",
+      :path     => "config/properties",
       :accept   => 'application/vnd.abiquo.systemproperties+json'
     )
   end
