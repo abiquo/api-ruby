@@ -212,7 +212,7 @@ class AbiquoAPI
     req_hash[:content] = "#{ctype}; version=#{@version};" unless ctype.eql? ""
 
     resp = @http_client.request(req_hash)
-    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
+    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({:client => self}.merge(resp))
   end
 
   ##
@@ -249,7 +249,7 @@ class AbiquoAPI
     req_hash[:content] = "#{ctype}; version=#{@version};" unless ctype.eql? ""
 
     resp = @http_client.request(req_hash)
-    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({ :client => self}.merge(resp))
+    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({:client => self}.merge(resp))
   end
 
   ##
@@ -264,12 +264,12 @@ class AbiquoAPI
   # Returns nil
   #
   def delete(link, options = {})
-    @http_client.request(
-      :expects  => [204],
+    resp = @http_client.request(
+      :expects  => [204,202],
       :method   => 'DELETE',
       :path     => link.href,
       :query    => options
     )
-    nil
+    resp.nil? ? nil : AbiquoAPIClient::LinkModel.new({:client => self}.merge(resp))
   end
 end
