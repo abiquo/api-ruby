@@ -151,7 +151,7 @@ module AbiquoAPIClient
     # Returns a new instance representing the updated resource.
     #
     def update(options = {})
-      @client.put(self.link(:edit), self, options)
+      @client.put(self.link(:edit), self.to_json, options)
     end
 
     ##
