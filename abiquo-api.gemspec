@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency "faraday", '~> 0.9.2', '>= 0.9.2'
   gem.add_runtime_dependency "faraday_middleware", '~> 0.10.0', '>= 0.10.0'
   gem.add_runtime_dependency "simple_oauth", '~> 0.3.1', '>= 0.3.1'
-  gem.add_runtime_dependency "addressable", '~> 2.4.0', '>= 2.4.0'
   gem.add_runtime_dependency "formatador", '~> 0.2', '>= 0.2.5'
-  gem.add_runtime_dependency "json", '~> 2.0', '>= 2.0.2'
+  gem.add_runtime_dependency "addressable"
+  gem.add_runtime_dependency "json"
 end
