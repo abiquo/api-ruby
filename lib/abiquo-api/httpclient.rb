@@ -33,7 +33,12 @@ module AbiquoAPIClient
     #                           :ssl_verify_peer => <true_or_false>, :ssl_ca_path => <path_to_ca_file> }
     #
     def initialize(api_url, creds, connection_options)
-      if creds.has_key? :consumer_key
+      if creds.has_key? :access_token
+        @connection = Faraday.new(api_url, connection_options) do |c|
+          c.authorization :Bearer, creds[:access_token]
+          c.adapter :excon
+        end
+      elsif creds.has_key? :consumer_key
         @connection = Faraday.new(api_url, connection_options) do |c|
           c.request :oauth, creds
           c.adapter :excon
