@@ -173,7 +173,7 @@ l1 = AbiquoAPI::Link.new(:href => '/api/cloud/virtualdatacenters',
 #### Post data
 
 ```ruby
-v2 = a.post(l1, v1)
+v2 = a.post(l1, v1.to_json)
 ```
 
 #### Modify the created object
